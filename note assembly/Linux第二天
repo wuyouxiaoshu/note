@@ -1,0 +1,285 @@
+﻿作业题:
+cat passwd | head -`cat passwd | grep "^xyx" -n | cut -d ':' -f 1` | tail -1 > user.txt
+
+
+diff:比较两个文件的不同,并输出不同的地方
+patch:打补丁操作
+at pads
+打补丁:
+1.通过diff比较两个文件的不同,生成补丁文件
+	-r:比较子目录中的文件
+	-u:以合并的方式来显示文件内容的不同,统一格式输出
+	-N:在比较目录时,若文件A仅出现在某个目录中,视为与一个空文件进行比较
+	diff  -ruN  old(旧的，空的)(需要打补丁  new(新的文件)  >  diff.txt
+2.切换到需要打补丁的目录中,或者是需要打补丁文件所在的路径下
+	cd old(13_1)
+3.完成打补丁操作
+	patch -p1 < 补丁文件所在路径/补丁文件  (../diff.txt)  
+	-p    去除相对路径层数
+4.撤销补丁操作
+	patch -Rp1 < 补丁文件所在路径/补丁文件 (../diff.txt)
+	-R    将新添加的文件撤销
+
+压缩命令:
+gzip 文件名:默认得到的压缩文件以.gz为结尾
+malloc1.c.gz 
+-l : 查看文件压缩后的信息
+-num(1-9):压缩等级等级越大,压缩力度越大
+-d: 解压缩文件
+bzip2 文件名:默认得到压缩文件以.bz2位结尾
+malloc1.c.bz2
+
+混合压缩方式不推荐
+malloc1.c.bz2.gz
+
+gzip不能压缩目录
+
+解压缩
+gunzip  压缩文件名(.gz) 
+bunzip2 压缩文件名(.bz2)
+
+tar:归档整理
+-c:创建归档文件
+-f:指定生成的名字
+-z:指定使用gzip进行压缩
+-j:指定使用bzip2进行压缩
+-v:显示执行过程
+-x:释放
+
+
+tar -cf      归档    test.tar
+tar -czvf  使用gzip对归档文件压缩   test.tar.gz
+tar -cjvf   使用bzip2对归档文件压缩 test.tar.bz2
+
+tar -xvf    释放并解压缩   
+
+一般形式:
+tar  选项   名字     被归档压缩的目标
+
+用户管理命令:
+echo:用于标准输出
+date:打印当前时间
+date -s  时:分:秒   修改当前时间
+
+帮助手册
+1.man手册
+2.help
+	命令 --help
+3.info
+	info 命令
+
+passwd:修改账户密码
+passwd username(用户名)
+passwd 修改当前用户的密码
+
+xyx@ubuntu:~$   
+	$:代表普通用户    使用sudo命令借助root权限
+	#:代表超级用户
+sudo passwd  默认修改root用户密码
+
+su:临时改变用户身份
+su root
+root@ubuntu:/home/xyx#
+su -m:保证环境变量不变
+su -:环境变量切换(默认切换到root)
+export(查看环境变量)
+
+exit:退出当前用户
+
+df:查看磁盘使用情况
+-T(显示系统信息)
+-h(带单位显示系统信息)
+
+du:一般针对目录,查看文件占用磁盘空间
+-h:带单位显示
+
+
+
+linux:x:1000:1000:ubuntu:/home/linux:/bin/bash
+man 5 passwd   查看用户级文件属性
+/etc/passwd
+login name     用户名
+optional encrypted password   加密密码
+numerical user ID  用户ID
+numerical group ID   用户组ID
+user name or comment field  用户详细信息
+user home directory  用户家目录
+optional user command interpreter  用户使用的shell
+
+用户组:
+配置文件:/etc/group
+linux:x:1000:
+用户组名
+加密口令
+GID:用户组ID
+组内成员列表
+
+adduser
+添加用户
+sudo adduser  用户名
+创建流程:
+先新建用户组
+新建用户
+把用户放到组内
+创建对应家目录
+拷贝/etc/skel拷贝到家目录中
+设置密码
+
+
+验证:
+/etc/group
+/etc/passwd
+ls /home
+ls -a /home/testuser1   和  ls   -a /etc/skel 是否相同
+
+adduser配置文件
+/etc/adduser.conf
+
+新添加的用户无法使用sudo命令解决方法:
+(不在sudoers文件中)
+1.切换到root用户
+su -
+2.打开配置文件
+vi /etc/sudoers
+3.添加内容
+新的用户名 ALL=(ALL:ALL) ALL
+shift+:
+w!
+q
+保存退出
+
+usermod:修改用户属性
+usermod -d /home/newname -m(文件不存在,强制创建) -l 新的用户名   老的用户名
+修改用户名,以及家目录的名字
+改变用户属于的组
+sudo usermod -g 新的组名 用户名
+
+sudo deluser 用户名:指定删除用户  (保留配置文件(家目录),工作组也存在)
+
+sudo deluser --remove-home 用户名:删除用户并移除工作目录
+
+添加用户组:
+sudo addgroup groupname
+
+删除用户组:
+sudo delgroup groupname    用户组中有成员时需要先删除用户,再删除组
+
+进程管理命令
+
+ps:查看进程状态
+ps -ef :查看进程信息
+UID      PID          PPID
+用户名  进程编号  父进程编号
+
+ps -aux  查看进程状态             占用虚拟内存大小   进程状态  开始时间
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+		cpu占用率  内存占用率   占用实际内存大小
+
+进程状态:
+S:阻塞
++:前台运行
+R:运行
+T:暂停    ctrl+z
+Z或D:(僵尸态)(资源没有回收)
+
+
+top:监视进程
+q退出监视
+
+renice -n  数字 (0~9)  进程号
+
+pstree  以树形图形式展现进程
+
+kill:给进程发送信号
+
+kill -l :列出支持的信号
+kill -信号编号 PID(进程编号)    默认发送15
+
+kill -9 PID   :发送杀死进程的指令  ctrl+c
+kill -18 PID :  使进程继续执行
+
+文件系统
+组织和管理计算机存储设备上的大量文件,并给用户提供接口
+
+
+磁盘文件系统:
+FAT FAT16  FAT32   NTFS  windows
+EXT3   EXT4  日志文件系统(回溯时间点的功能)
+网络文件系统:
+NFS(共享文件系统)
+samba
+
+sudo fdisk -l:查看磁盘分区
+/dev/sda1
+	sd:SATA  SCSI  
+	hd:IDE硬盘
+	a:代表第一块磁盘
+	1:分区编号
+
+交换分区(swapping)
+大小内存的1.5~2倍
+在硬盘起始位置
+缓解内存压力
+
+LINUX文件系统结构
+/:根目录
+
+/bin:可执行程序
+/dev:设备驱动
+/etc:配置文件
+/lib:库文件
+/boot:系统启动文件
+/mnt:文件系统挂载点
+/home:家目录
+
+file 文件名:查看文件类型
+
+ls -i  查看文件的inode号(文件的识别码)
+
+ln:创建连接文件
+硬链接:相当于给现有文件取别名,产生新的文件名
+ln 源文件  硬链接文件
+特点:
+1.如果修改源文件或者硬连接文件,另一个文件也会发生修改
+2.删除源文件或者硬链接文件,另一个文件不会发生改变
+3.硬链接文件不额外占空间
+4.不能对目录进行硬链接创建
+5.不可以跨文件系统
+
+软连接(符号链接):相当于快捷方式
+ln -s 源文件(绝对路径)   软连接文件
+lrwxrwxrwx 1 xyx xyx     8 Aug 15 15:50 123.txt -> user.txt
+特点:
+1.如果修改源文件或者软连接文件,另一个文件也会发生修改
+2.如果删除源文件,软连接文件会失效,如果创建相同名字的源文件,软连接文件再次生效
+3.软连接文件会占用新的存储空间(inode)
+4.可以对目录创建软连接
+5.可以跨文件系统,但是所创建的软连接文件必须在同一linux环境下
+
+网络管理命令
+查看当前IP地址
+sudo ifconfig  网卡    ip地址
+
+/etc/network/interfaces   网络配置文件
+
+sudo dhclient(动态获取ip)
+sudo /etc/init.d/networking restart 网络重启
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
